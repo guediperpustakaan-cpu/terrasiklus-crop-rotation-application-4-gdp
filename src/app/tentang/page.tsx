@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -56,9 +58,9 @@ export default function AboutPage() {
           <a href="#fitur">Kenali TerraSiklus</a>
           <a href="#mulai">Mulai berkebun</a>
         </nav>
-        <a href="/" className="button button-primary">
+        <Link href="/" className="button button-primary">
           Buka kebunku <ArrowUpRight size={15} />
-        </a>
+        </Link>
       </header>
       <main id="main-content">
         <section className="landing-hero">
@@ -77,20 +79,22 @@ export default function AboutPage() {
               baik.
             </p>
             <div className="landing-hero-actions">
-              <a href="/" className="button button-primary">
+              <Link href="/" className="button button-primary">
                 <Sprout size={17} /> Mulai perjalanan kebunmu{" "}
                 <ArrowRight size={15} />
-              </a>
+              </Link>
               <a href="#fitur">
                 Kenali caranya <ArrowRight size={13} />
               </a>
             </div>
           </div>
           <div className="landing-hero-photo">
-            <img
+            <Image
               src="/images/hero.jpg"
               alt="Barisan sayuran hijau yang tumbuh subur di kebun organik saat cahaya matahari sore"
-              fetchPriority="high"
+              fill
+              priority
+              sizes="(max-width: 1100px) 100vw, 560px"
             />
             <div className="landing-photo-label">
               <Leaf size={29} strokeWidth={1.4} />
@@ -142,9 +146,9 @@ export default function AboutPage() {
             Jelajahi ruang kebun contoh, buat petak pertamamu, dan temukan cara
             berkebun yang lebih seimbang bersama TerraSiklus.
           </p>
-          <a href="/" className="button button-primary">
+          <Link href="/" className="button button-primary">
             Buka ruang kebunku <ArrowRight size={15} />
-          </a>
+          </Link>
         </section>
       </main>
       <footer className="landing-footer">

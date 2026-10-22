@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowLeft, Sprout } from "lucide-react";
 
 export default function NotFound() {
@@ -10,9 +11,9 @@ export default function NotFound() {
           Halaman yang kamu cari tidak ditemukan. Mari kembali ke ruang
           tumbuhmu.
         </p>
-        <a href="/" className="button button-primary">
+        <Link href="/" className="button button-primary">
           <ArrowLeft size={16} /> Kembali ke kebun
-        </a>
+        </Link>
       </div>
     </main>
   );

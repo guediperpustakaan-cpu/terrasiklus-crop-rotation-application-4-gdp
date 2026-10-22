@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   ArrowUpRight,
   CalendarDays,
@@ -46,10 +47,11 @@ export function PlotCard({
     >
       <div className="plot-image">
         {crop ? (
-          <img
+          <Image
             src={crop.image}
             alt={`${crop.commonName} di ${plot.name}`}
-            loading="lazy"
+            fill
+            sizes="(max-width: 720px) 100vw, (max-width: 1200px) 45vw, 320px"
           />
         ) : (
           <div className="empty-plot-art">

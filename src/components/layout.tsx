@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   Bell,
@@ -125,7 +126,8 @@ export function AppLayout({
     result.type === "plot" ? onPlot(result.id) : onCrop(result.title);
     setQuery("");
     setSearchOpen(false);
-    input.current?.blur();
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) active.blur();
   };
   useEffect(() => {
     const keyboard = (event: KeyboardEvent) => {
@@ -163,7 +165,7 @@ export function AppLayout({
         />
       )}
       <aside className={`sidebar ${mobileOpen ? "sidebar-open" : ""}`}>
-        <a
+        <Link
           href="/"
           className="brand-link"
           onClick={(event) => {
@@ -173,7 +175,7 @@ export function AppLayout({
           aria-label="TerraSiklus, halaman ringkasan"
         >
           <Brand />
-        </a>
+        </Link>
         <button
           className="sidebar-mobile-close icon-button"
           onClick={() => setMobileOpen(false)}

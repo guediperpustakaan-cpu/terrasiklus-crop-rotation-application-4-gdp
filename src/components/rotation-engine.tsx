@@ -37,39 +37,51 @@ export function RotationEngine({
   onCreate: () => void;
 }) {
   const selected = data.plots.find((p) => p.id === plotId) || data.plots[0];
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [request, setRequest] = useState<{
+    key: string;
+    recommendations: Recommendation[];
+    error: string;
+    settled: boolean;
+  }>({ key: "", recommendations: [], error: "", settled: false });
   const [retry, setRetry] = useState(0);
-  const selectedId = selected?.id;
+  const selectedId = selected?.id ?? "";
+  const plantingsKey = data.plantings
+    .map((p) => `${p.id}:${p.plantedOn}:${p.harvestedOn ?? ""}`)
+    .join("|");
+  const requestKey = `${selectedId}:${plantingsKey}:${retry}`;
   useEffect(() => {
-    if (!selectedId) {
-      setLoading(false);
-      return;
-    }
+    if (!selectedId) return;
     const controller = new AbortController();
-    setLoading(true);
-    setError("");
     fetch(`/api/rotation?plotId=${selectedId}`, { signal: controller.signal })
       .then(async (response) => {
         const result = await response.json();
         if (!response.ok)
           throw new Error(result.error || "Rekomendasi belum tersedia.");
-        setRecommendations(result);
+        setRequest({
+          key: requestKey,
+          recommendations: result,
+          error: "",
+          settled: true,
+        });
       })
       .catch((err) => {
-        if (err.name !== "AbortError")
-          setError(
+        if (err.name === "AbortError") return;
+        setRequest({
+          key: requestKey,
+          recommendations: [],
+          error:
             err instanceof TypeError
               ? "Koneksi belum tersedia. Periksa jaringan dan coba kembali."
               : err.message,
-          );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+          settled: true,
+        });
       });
     return () => controller.abort();
-  }, [selectedId, data.plantings, retry]);
+  }, [selectedId, requestKey]);
+  const isCurrent = request.key === requestKey;
+  const loading = Boolean(selectedId) && (!isCurrent || !request.settled);
+  const recommendations = isCurrent ? request.recommendations : [];
+  const error = isCurrent ? request.error : "";
   const history = data.plantings
     .filter((p) => p.plotId === selectedId)
     .slice(0, 3)

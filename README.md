@@ -12,10 +12,12 @@ Aplikasi berbahasa Indonesia untuk pengelolaan kebun, rotasi tanaman, riwayat ta
 
 ## Menjalankan proyek
 
-1. Siapkan PostgreSQL dan atur `DATABASE_URL` pada `.env` (lihat `.env.example`). Jangan memasukkan kredensial ke Git.
+1. Siapkan PostgreSQL dan atur `DATABASE_URL` pada `.env.local` (lihat `.env.example`). Jangan memasukkan kredensial ke Git — `.env` dan `.env.local` sudah masuk `.gitignore`.
 2. Pasang dependensi dengan `npm install`.
-3. Terapkan migrasi dengan `npx drizzle-kit migrate`.
-4. Jalankan `npm run dev` untuk pengembangan, atau `npm run build` untuk build produksi.
+3. Terapkan migrasi dengan `npm run db:migrate` (perintah ini membaca `.env.local` lalu `.env`).
+4. Jalankan `npm run dev` untuk pengembangan, atau `npm run build` && `npm start` untuk build produksi.
+
+Koneksi database dibuat secara **lazy**: modul `src/db/index.ts` baru membuka koneksi PostgreSQL saat query pertama dijalankan. Karena itu `npm run build` tetap berhasil di lingkungan build yang belum punya `DATABASE_URL` (misalnya build di Vercel), dan pesan "DATABASE_URL is required" hanya muncul ketika aplikasi benar-benar membutuhkan database.
 
 Pada lingkungan preview terkelola, runtime akan menyediakan database dan menjalankan server produksi. Migrasi awal sudah tersedia di `drizzle/`.
 
@@ -23,11 +25,41 @@ Pada lingkungan preview terkelola, runtime akan menyediakan database dan menjala
 
 1. Buat proyek Neon dan salin connection string dari panel **Connect**.
 2. Set `DATABASE_URL` ke URL pooled untuk aplikasi, dengan `sslmode=require`.
-3. Set `DATABASE_URL_UNPOOLED` ke URL direct/non-pooled untuk migrasi.
-4. Jalankan `npx drizzle-kit migrate`.
+3. Set `DATABASE_URL_UNPOOLED` ke URL direct/non-pooled untuk migrasi (beda host: tanpa awalan `-pooler`).
+4. Jalankan `npm run db:migrate`.
 5. Deploy sebagai aplikasi Next.js Node.js dan set kedua variabel tersebut di sisi server. Tidak ada kredensial database di bundle peramban.
 
+Contoh isi `.env.local`:
+
+```bash
+# URL pooled (runtime aplikasi)
+DATABASE_URL=postgresql://neondb_owner:PASSWORD@ep-xxxx-pooler.REGION.aws.neon.tech/neondb?sslmode=require
+
+# URL direct (migrasi) — host tanpa "-pooler"
+DATABASE_URL_UNPOOLED=postgresql://neondb_owner:PASSWORD@ep-xxxx.REGION.aws.neon.tech/neondb?sslmode=require
+```
+
 Konfigurasi Drizzle memakai `DATABASE_URL_UNPOOLED` jika tersedia, lalu menggunakan `DATABASE_URL` sebagai fallback. Koneksi runtime berada di `src/db/index.ts`.
+
+> Penting: URL pooled Neon memakai mode PgBouncer _transaction_. Kode ini tetap aman karena transaksi Drizzle memakai satu koneksi khusus (`pool.connect()`), dan advisory lock dipakai untuk menjaga integritas data.
+
+## Deploy ke Vercel
+
+1. Push repositori ke GitHub lalu import ke Vercel (framework terdeteksi otomatis: Next.js).
+2. Di **Project Settings → Environment Variables**, tambahkan untuk **Production**, **Preview**, dan **Development**:
+   - `DATABASE_URL` → URL pooled Neon (wajib ada di runtime).
+   - `DATABASE_URL_UNPOOLED` → URL direct Neon (dipakai saat migrasi manual).
+3. **Build Command** biarkan `npm run build`, **Output Directory** biarkan `.next` (default Next.js di Vercel).
+4. Jalankan migrasi sekali sebelum/− setelah deploy pertama, dari mesin lokal dengan kredensial Neon:
+   ```bash
+   npm run db:migrate
+   ```
+   atau jalankan perintah yang sama di Vercel Shell / CI.
+5. Verifikasi deploy:
+   - `https://YOUR-APP.vercel.app/api/health` → `{"ok":true}`
+   - `https://YOUR-APP.vercel.app/` → dashboard terisi data contoh.
+
+Tidak ada build step yang butuh kredensial database, dan `DATABASE_URL` hanya dipakai di server (runtime Node.js), bukan di bundle peramban.
 
 ## Skema dan migrasi
 
@@ -43,7 +75,7 @@ Sumber skema: `src/db/schema.ts`.
 
 Foreign key, indeks tanggal/petak, constraint luas positif, tanggal panen, rentang pH, dan nilai hara didefinisikan di skema dan migrasi SQL. Penghapusan kebun/petak menghapus catatan terkait melalui cascade dan selalu dikonfirmasi di UI.
 
-Setelah perubahan skema: `npx drizzle-kit generate`, tinjau SQL, lalu `npx drizzle-kit migrate`.
+Setelah perubahan skema: `npm run db:generate`, tinjau SQL, lalu `npm run db:migrate`.
 
 ## Data contoh
 
@@ -118,16 +150,20 @@ Ini adalah panduan agronomi umum, bukan jaminan bebas hama. Kebutuhan hara dan p
 
 Jalankan dari root:
 
-- `npx next typegen`
-- `npm exec tsc -- --noEmit --pretty false`
+- `npm run typecheck`
+- `npm run lint`
 - `npm run build`
+
+Ketiganya harus lolos tanpa error. `npm run build` sengaja tetap berjalan tanpa `DATABASE_URL` untuk mencerminkan kondisi build di Vercel.
 
 Setelah itu gunakan runtime preview terkelola untuk memeriksa bootstrap dan `/api/health`.
 
-Pengujian end-to-end tersedia di `scripts/smoke.mjs`. Setelah server aktif, siapkan Chromium dengan `npx playwright install --with-deps chromium`, lalu jalankan `node scripts/smoke.mjs`. Gunakan `TEST_BASE_URL` jika server bukan `http://127.0.0.1:3000`. Tes memeriksa navigasi, pencarian, CRUD kebun/petak, penanaman, panen, uji tanah, rekomendasi, peringatan, konkurensi, ekspor CSV, persistensi setelah reload, dan tampilan seluler. Kebun sementara dihapus pada akhir tes; data contoh tetap utuh.
+Pengujian end-to-end tersedia di `scripts/smoke.mjs`. Setelah server aktif, siapkan Chromium dengan `npx playwright install --with-deps chromium`, lalu jalankan `npm run smoke`. Gunakan `TEST_BASE_URL` jika server bukan `http://127.0.0.1:3000`. Tes memeriksa navigasi, pencarian, CRUD kebun/petak,planting, panen, uji tanah, rekomendasi, peringatan, konkurensi, ekspor CSV, persistensi setelah reload, dan tampilan seluler. Kebun sementara dihapus pada akhir tes; data contoh tetap utuh.
 
 Untuk menjaga format kode, jalankan `npx prettier --write src scripts drizzle.config.ts README.md`.
 
 ## Aset
 
-Foto tanaman dari Pexels (Thể Phạm, Bagus Prabangkara, Helena Lopes, Boys in Bristol Photography). Hero kebun dibuat khusus untuk TerraSiklus. Plus Jakarta Sans dilisensikan dengan SIL Open Font License. Ikon Lucide berlisensi ISC.
+- Foto tanaman dan hero kebun berada di `public/images/`. Ilustrasi dibuat oleh `scripts/generate-assets.mjs` (SVG → JPEG memakai `sharp`), jalankan `npm run assets` untuk membuat ulang.
+- Font Plus Jakarta Sans (lisensi SIL Open Font License, `public/fonts/OFL.txt`) memakai subset latin dan latin-ext di `public/fonts/`.
+- Ikon Lucide berlisensi ISC.

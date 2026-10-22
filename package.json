@@ -1,12 +1,17 @@
 {
-  "name": "nextjs-postgresql-template",
+  "name": "terrasiklus",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "assets": "node scripts/generate-assets.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "dotenv": "17.3.1",
@@ -29,6 +34,7 @@
     "eslint": "9.39.4",
     "eslint-config-next": "^16.4.2",
     "postcss": "^8.5.8",
+    "sharp": "^0.35.5",
     "tailwindcss": "4.1.17",
     "typescript": "5.9.3"
   }

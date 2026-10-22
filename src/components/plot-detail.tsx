@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   ArrowRight,
   CalendarDays,
@@ -55,11 +56,13 @@ export function PlotDetail({
   return (
     <div className="plot-detail">
       <div className="detail-photo">
-        <img
+        <Image
           src={crop?.image || "/images/hero.jpg"}
           alt={
             crop ? `${crop.commonName} di ${plot.name}` : "Kebun sayuran hijau"
           }
+          fill
+          sizes="(max-width: 900px) 100vw, 640px"
         />
         <Badge tone={status === "Siap panen" ? "orange" : "green"}>
           {status}
