@@ -10,6 +10,9 @@ build/
 next-env.d.ts
 *.tsbuildinfo
 
+# Generated source archive (dibuat ulang oleh scripts/package-source.mjs)
+/public/terrasiklus-source.zip
+
 # Environment variables — jangan pernah commit kredensial database
 .env
 .env.local
@@ -26,6 +29,7 @@ yarn-error.log*
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+/artifacts/
 
 # Editor & OS
 .vscode/*

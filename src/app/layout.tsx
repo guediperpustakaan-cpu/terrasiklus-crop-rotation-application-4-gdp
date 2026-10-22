@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { TrakteerWidget } from "@/components/trakteer-widget";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Langsung ke konten
         </a>
         {children}
+        <TrakteerWidget />
       </body>
     </html>
   );

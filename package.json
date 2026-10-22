@@ -3,7 +3,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "predev": "node scripts/package-source.mjs",
     "build": "next build",
+    "prebuild": "node scripts/package-source.mjs",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -11,6 +13,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "assets": "node scripts/generate-assets.mjs",
+    "source:package": "node scripts/package-source.mjs",
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
@@ -21,6 +24,7 @@
     "pg": "8.20.0",
     "playwright": "^1.64.1",
     "prettier": "^3.9.10",
+    "qrcode-generator": "^2.0.4",
     "react": "19.2.6",
     "react-dom": "19.2.6"
   },

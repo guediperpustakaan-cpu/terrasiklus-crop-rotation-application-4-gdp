@@ -6,6 +6,7 @@ import {
   ArrowUpRight,
   BookOpen,
   Check,
+  Download,
   FlaskConical,
   House,
   Leaf,
@@ -14,6 +15,11 @@ import {
   Sprout,
 } from "lucide-react";
 import { Brand } from "@/components/layout";
+import {
+  OPEN_SOURCE_CREDIT,
+  SOURCE_DOWNLOAD_URL,
+  SOURCE_FILE_NAME,
+} from "@/lib/support";
 
 export const metadata: Metadata = {
   title: "Bertumbuh bersama TerraSiklus — Kebun kecil, dampak besar",
@@ -154,7 +160,12 @@ export default function AboutPage() {
       <footer className="landing-footer">
         <Brand />
         <span>Dirawat dengan hati, tumbuh bersama TerraSiklus.</span>
-        <span>© {new Date().getFullYear()} TerraSiklus</span>
+        <span className="landing-footer-links">
+          <a href={SOURCE_DOWNLOAD_URL} download={SOURCE_FILE_NAME}>
+            <Download size={14} /> Unduh Source Code
+          </a>
+          <small>{OPEN_SOURCE_CREDIT}</small>
+        </span>
       </footer>
     </div>
   );

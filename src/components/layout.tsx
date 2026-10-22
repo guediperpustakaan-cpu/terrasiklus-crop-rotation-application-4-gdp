@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ChevronRight,
   CircleHelp,
+  Download,
   FlaskConical,
   Flower2,
   History,
@@ -27,6 +28,11 @@ import {
   Wheat,
 } from "lucide-react";
 import type { Page, Workspace } from "@/lib/types";
+import {
+  OPEN_SOURCE_CREDIT,
+  SOURCE_DOWNLOAD_URL,
+  SOURCE_FILE_NAME,
+} from "@/lib/support";
 import {
   activePlanting,
   daysBetween,
@@ -408,9 +414,15 @@ export function AppLayout({
             <Sprout size={14} /> Dirawat dengan hati, tumbuh bersama
             TerraSiklus.
           </span>
-          <button onClick={onGuide}>
-            Panduan berkebun <ArrowRight size={13} />
-          </button>
+          <span className="app-footer-links">
+            <button onClick={onGuide}>
+              Panduan berkebun <ArrowRight size={13} />
+            </button>
+            <a href={SOURCE_DOWNLOAD_URL} download={SOURCE_FILE_NAME}>
+              <Download size={13} /> Unduh Source Code
+            </a>
+            <small>{OPEN_SOURCE_CREDIT}</small>
+          </span>
         </footer>
       </div>
     </div>

@@ -145,6 +145,44 @@ Ini adalah panduan agronomi umum, bukan jaminan bebas hama. Kebutuhan hara dan p
 - `pages.tsx`: pengelolaan kebun, katalog, riwayat, panduan.
 - `forms.tsx`: formulir CRUD, panen, profil, konfirmasi penghapusan.
 - `ui.tsx`: dialog dengan focus trap dan Escape, badge, status kosong, error.
+- `trakteer-widget.tsx`: gelembung dukungan Trakteer di pojok kanan bawah beserta QR code.
+- `support.ts` (`src/lib/support.ts`): konstanta halaman Trakteer, nominal, dan tautan unduh source code.
+
+## Widget dukungan Trakteer
+
+Tombol bulat merah di pojok kanan bawah (khas overlay Trakteer) membuka panel dukungan **tanpa berpindah halaman**. Isinya:
+
+- Teks: "Web app ini gratis & bebas iklan. Kopi kecil, server tetap jalan".
+- Pilihan nominal kelipatan dua mulai dari Rp6.000: Rp6.000, Rp12.000, Rp24.000, Rp48.000, Rp96.000, Rp192.000.
+- QR code yang digenerate di sisi peramban (`qrcode-generator`, lisensi MIT, tanpa dependensi tambahan) berisi tautan Trakteer dengan nominal terpilih, jadi nominal bisa langsung dipindai.
+- Tombol "Buka Trakteer" dan "Salin tautan" untuk aplikasi pembayaran lain.
+
+Semua nominal adalah kelipatan dari unit "Kopi" Rp6.000 milik kreator, sehingga jumlah kopi di Trakteer selalu bulat. Target halaman Trakteer diatur di `src/lib/support.ts`:
+
+```ts
+export const TRAKTEER_PROFILE = "https://trakteer.id/perpus_opera";
+export const TRAKTEER_TIP = "https://trakteer.id/perpus_opera/tip";
+```
+
+Panel bisa ditutup dengan tombol tutup, klik di luar, atau tombol Escape, dan fokus dikembalikan ke tombol pemicu.
+
+## Unduh source code
+
+Tombol "Unduh Source Code" di footer aplikasi, footer landing page, dan panel dukungan mengunduh arsip `terrasiklus-source.zip` yang berisi seluruh source project (folder `src/`, `public/`, `scripts/`, `drizzle/`, konfigurasi, `LICENSE`, dan `README.md`).
+
+Arsip dibuat oleh `scripts/package-source.mjs` — penulis ZIP kecil tanpa dependensi tambahan, memakai `node:zlib` (`deflateRaw` + `crc32`). Perintah:
+
+```bash
+npm run source:package
+```
+
+Skrip tersebut juga dijalankan otomatis oleh `prebuild` dan `predev`, jadi file zip selalu tersedia saat build produksi maupun saat pengembangan lokal. File rahasia tidak pernah ikut: `.env`, `.env.local`, dan berkas `.env.*` lain dikecualikan, `node_modules/`, `.next/`, dan `artifacts/` juga tidak disertakan.
+
+## Lisensi
+
+MIT — lihat berkas `LICENSE`.
+
+**Open Source oleh MZF - 2026.**
 
 ## Validasi
 
@@ -158,7 +196,7 @@ Ketiganya harus lolos tanpa error. `npm run build` sengaja tetap berjalan tanpa 
 
 Setelah itu gunakan runtime preview terkelola untuk memeriksa bootstrap dan `/api/health`.
 
-Pengujian end-to-end tersedia di `scripts/smoke.mjs`. Setelah server aktif, siapkan Chromium dengan `npx playwright install --with-deps chromium`, lalu jalankan `npm run smoke`. Gunakan `TEST_BASE_URL` jika server bukan `http://127.0.0.1:3000`. Tes memeriksa navigasi, pencarian, CRUD kebun/petak,planting, panen, uji tanah, rekomendasi, peringatan, konkurensi, ekspor CSV, persistensi setelah reload, dan tampilan seluler. Kebun sementara dihapus pada akhir tes; data contoh tetap utuh.
+Pengujian end-to-end tersedia di `scripts/smoke.mjs`. Setelah server aktif, siapkan Chromium dengan `npx playwright install --with-deps chromium`, lalu jalankan `npm run smoke`. Gunakan `TEST_BASE_URL` jika server bukan `http://127.0.0.1:3000`. Tes memeriksa navigasi, pencarian, CRUD kebun/petak,planting, panen, uji tanah, rekomendasi, peringatan, konkurensi, ekspor CSV, persistensi setelah reload, tampilan seluler, widget dukungan Trakteer, dan unduh source code. Kebun sementara dihapus pada akhir tes; data contoh tetap utuh.
 
 Untuk menjaga format kode, jalankan `npx prettier --write src scripts drizzle.config.ts README.md`.
 
@@ -167,3 +205,4 @@ Untuk menjaga format kode, jalankan `npx prettier --write src scripts drizzle.co
 - Foto tanaman dan hero kebun berada di `public/images/`. Ilustrasi dibuat oleh `scripts/generate-assets.mjs` (SVG → JPEG memakai `sharp`), jalankan `npm run assets` untuk membuat ulang.
 - Font Plus Jakarta Sans (lisensi SIL Open Font License, `public/fonts/OFL.txt`) memakai subset latin dan latin-ext di `public/fonts/`.
 - Ikon Lucide berlisensi ISC.
+- Pustaka `qrcode-generator` (MIT) membuat QR code widget dukungan.

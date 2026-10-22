@@ -384,6 +384,45 @@ try {
   console.log(
     "PASS: landing-to-dashboard flow and no browser JavaScript errors",
   );
+
+  const beforeWidget = page.url();
+  const fab = page.locator(".support-fab");
+  await fab.waitFor();
+  assert.ok(
+    (await fab.innerText()).includes("Kopi kecil, server tetap jalan"),
+  );
+  await fab.click();
+  const support = page.getByRole("dialog", { name: "Dukung TerraSiklus" });
+  await support.waitFor();
+  assert.equal(page.url(), beforeWidget);
+  const amounts = support.getByRole("button", { name: /^Rp/ });
+  assert.equal(await amounts.count(), 6);
+  assert.deepEqual(await amounts.allInnerTexts(), [
+    "Rp6.000",
+    "Rp12.000",
+    "Rp24.000",
+    "Rp48.000",
+    "Rp96.000",
+    "Rp192.000",
+  ]);
+  await support.getByRole("button", { name: "Rp24.000", exact: true }).click();
+  const trakteerLink = support.getByRole("link", { name: "Buka Trakteer" });
+  assert.ok(
+    (await trakteerLink.getAttribute("href")).includes("amount=24000"),
+  );
+  assert.equal(await support.locator("svg.support-qr").count(), 1);
+  await page.keyboard.press("Escape");
+  await support.waitFor({ state: "hidden" });
+  console.log(
+    "PASS: Trakteer support widget, inline QR, amount ladder, no navigation",
+  );
+
+  const archive = await fetch(`${base}/terrasiklus-source.zip`);
+  assert.equal(archive.status, 200);
+  const bytes = Buffer.from(await archive.arrayBuffer());
+  assert.equal(bytes.subarray(0, 2).toString(), "PK");
+  assert.ok(bytes.length > 10000);
+  console.log("PASS: source code archive served as a valid ZIP");
 } catch (error) {
   await page
     .screenshot({ path: "artifacts/test-failure.png", fullPage: true })
